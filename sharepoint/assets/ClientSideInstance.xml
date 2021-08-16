@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--UPDATE_HERE-->
+<Elements xmlns="http://schemas.microsoft.com/sharepoint/">
+    <ClientSideComponentInstance
+        Title="UpdateDocProperties"
+        Location="ClientSideExtension.ListViewCommandSet.CommandBar"
+        ListTemplateId="100"
+        Properties="{&quot;siteUrl&quot;:&quot;https://zinedinebenkhider.sharepoint.com/sites/MetaDataEnterprise&quot;}"
+        ComponentId="467f2217-c0cf-4603-a0f8-b92f991897f3" />
+</Elements>

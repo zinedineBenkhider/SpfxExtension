@@ -1,0 +1,45 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/config.2.0.schema.json",
+  "version": "2.0",
+  "bundles": {
+    "update-doc-properties-command-set": {
+      "components": [
+        {
+          "entrypoint": "./lib/extensions/updateDocProperties/UpdateDocPropertiesCommandSet.js",
+          "manifest": "./src/extensions/updateDocProperties/UpdateDocPropertiesCommandSet.manifest.json"
+        }
+      ]
+    }
+  },
+  //UPDATE_HERE
+  "externals": {
+    "sp-init": {
+      "path": "https://zinedinebenkhider.sharepoint.com/_layouts/15/init.js",
+      "globalName": "$_global_init"
+    },
+    "microsoft-ajax": {
+      "path": "https://zinedinebenkhider.sharepoint.com/_layouts/15/MicrosoftAjax.js",
+      "globalName": "Sys",
+      "globalDependencies": [
+        "sp-init"
+      ]
+    },
+    "sp-runtime": {
+      "path": "https://zinedinebenkhider.sharepoint.com/_layouts/15/SP.Runtime.js",
+      "globalName": "SP",
+      "globalDependencies": [
+        "microsoft-ajax"
+      ]
+    },
+    "sharepoint": {
+      "path": "https://zinedinebenkhider.sharepoint.com/_layouts/15/SP.js",
+      "globalName": "SP",
+      "globalDependencies": [
+        "sp-runtime"
+      ]
+    }
+  },
+  "localizedResources": {
+    "UpdateDocPropertiesCommandSetStrings": "lib/extensions/updateDocProperties/loc/{locale}.js"
+  }
+}
