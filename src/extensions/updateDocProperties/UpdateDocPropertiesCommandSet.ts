@@ -9,7 +9,9 @@ import { Dialog } from '@microsoft/sp-dialog';
 import { sp } from '@pnp/sp/presets/all';
 import { IFieldInfo } from "@pnp/sp/fields";
 import { toast } from 'toast-notification-alert'
+import UpdateDocPropertiesService from '../service/UpdatePropertiesService';
 
+//Sp context requirement
 require('sp-init');
 require('microsoft-ajax');
 require('sp-runtime');
@@ -17,7 +19,6 @@ require('sharepoint');
 
 
 export interface IUpdateDocPropertiesCommandSetProperties {
-  // This is an example; replace with your own properties
   siteUrl: string;
 }
 
@@ -37,7 +38,7 @@ export class Localisation {
 export default class UpdateDocPropertiesCommandSet extends BaseListViewCommandSet<IUpdateDocPropertiesCommandSetProperties> {
   @override
   public onInit(): Promise<void> {
-
+    
     //init sp contecspfxContext
     return super.onInit().then((_) => {
       sp.setup({
@@ -47,16 +48,17 @@ export default class UpdateDocPropertiesCommandSet extends BaseListViewCommandSe
   }
 
   //Cette méthode s'éxécute dans le Context SP (SP.ClientContext)
-  private spExecutionContext() {
+  // Elle contient des fonctions et des CallBack.  
+  private executeCommandMDE() {
     let clientContext: SP.ClientContext;
     let rootFolderProperties: SP.PropertyValues;
     let rootFolder: SP.Folder;
-    //CallBack qui se déclanche quand les propriétés de RootFolder sont récupérés 
-    let onGetRootFolderPropretiesSuccess = (sender: any, args: SP.ClientRequestSucceededEventArgs) => {
+    //CallBack qui se déclanche quand les propriétés de RootFolder sont récupérés, ou si la récupération échoue (LastUpdateDateTime n'éxiste pas encore). 
+    let onGetRootFolderPropreties = (sender: any, args: SP.ClientRequestSucceededEventArgs) => {
       let lastUpdateDateTime;
       try {
         lastUpdateDateTime = rootFolderProperties.get_item("LastUpdateDateTime");
-      } catch (error) {//La propriété LastUpdateDateTime n'éxiste pas, on prend une date antérieur. Aprés la mise à jour de la liste LastUpdateDateTime sera créé
+      } catch (error) {//La propriété LastUpdateDateTime n'éxiste pas, on prend une date antérieur. Aprés la mise à jour de la liste LastUpdateDateTime sera créé avec cette date. 
         lastUpdateDateTime = dateToIsoString(new Date('01 January 1900 00:00 UTC'));
       }
       updateItems(lastUpdateDateTime);
@@ -70,48 +72,52 @@ export default class UpdateDocPropertiesCommandSet extends BaseListViewCommandSe
     rootFolder = oweb.get_lists().getByTitle("Documents").get_rootFolder();
     rootFolderProperties = rootFolder.get_properties();
     clientContext.load(rootFolderProperties);
-    clientContext.executeQueryAsync(onGetRootFolderPropretiesSuccess, onGetRootFolderPropretiesSuccess);
+    clientContext.executeQueryAsync(onGetRootFolderPropreties, onGetRootFolderPropreties);
 
     //Cette Fonction met à jour les éléments de la liste de Documents
-    let updateItems = (lastUpdateDateTime) => {
-      setTimeout(async () => {
-        let validLanguages;
-        let validTypesDoc = [];
-        let validLocalisations: Localisation[] = [];
-      
+    let updateItems = async (lastUpdateDateTime) => {
+      let validLanguages;
+      let validTypesDoc = [];
+      let validLocalisations: Localisation[] = [];
 
-        //Récupérer les élément du Set Localisation
-         //UPDATE_HERE : ID du groupe CCI termeStore => 45f13976-c5f0-4f49-b7cf-004afa72d7b4 | ID du Set Localisation=> 7ee71116-9a06-40fe-be85-b66ee794847d
-        await sp.termStore.groups.getById("45f13976-c5f0-4f49-b7cf-004afa72d7b4").sets.getById("7ee71116-9a06-40fe-be85-b66ee794847d").children().then(items => {
-          let element;
-          for (let i = 0; i < items.length; i++) {
-            element = items[i];
-            validLocalisations.push(new Localisation(element.labels[0].name, element.id));
+      //UPDATE_HERE : ID du groupe CCI termeStore => 45f13976-c5f0-4f49-b7cf-004afa72d7b4 | ID du Set Localisation=> 7ee71116-9a06-40fe-be85-b66ee794847d
+      //Récupérer les élément du Set Localisation
+      let getLocationsPromise = sp.termStore.groups.getById("45f13976-c5f0-4f49-b7cf-004afa72d7b4").sets.getById("7ee71116-9a06-40fe-be85-b66ee794847d").children().then(items => {
+        let element;
+        for (let i = 0; i < items.length; i++) {
+          element = items[i];
+          validLocalisations.push(new Localisation(element.labels[0].name, element.id));
+        }
+      });
+
+      //récupérer la choice list du champs TypeDoc
+      let getChoicesPromise = sp.web.lists.getByTitle('Documents').fields.getByInternalNameOrTitle('TypeDoc').select('Choices').get().then((fieldData: IChoiceFieldInfo) => {
+        validTypesDoc = fieldData.Choices;
+      });
+
+      //récupérer la list Langues du champs Langue
+      let getLanguagesListPromise = sp.web.lists.getByTitle('Langues').items.select('Title', 'Id').get().then(langues => {
+        validLanguages = langues;
+      });
+
+      //Attendre que les promises terminent. nb: on attend que la plus lente des 3
+      await getLocationsPromise;
+      await getChoicesPromise;
+      await getLanguagesListPromise;
+      let items = sp.web.lists.getByTitle('Documents').items;
+
+      //Sélectionner les fichiers modifiés depuis la dérniére mise à jour, et modifié leurs champs si le nom du fichier est de bon format.
+      //FSObjType ne 1 => ne pas prendre les dossiers
+      //Modified ge datetime'${lastUpdateDateTime}' =>  champs Modified >lastUpdateDateTime
+      items.select('Id', 'File/Name').expand('File/Name').
+        filter(`FSObjType ne 1 and Modified ge datetime'${lastUpdateDateTime}'`)
+        .get().then(response => {
+          if (response.length == 0) {
+            toast.show({ title: '', message: "Toutes les informations sont à jour", type: "info", newestOnTop: false });
           }
-        });
-
-        //récupérer la choice list du champs TypeDoc
-        await sp.web.lists.getByTitle('Documents').fields.getByInternalNameOrTitle('TypeDoc').select('Choices').get().then((fieldData: IChoiceFieldInfo) => {
-          validTypesDoc = fieldData.Choices;
-        });
-
-        //récupérer la list Langues du champs Langue
-        await sp.web.lists.getByTitle('Langues').items.select('Title', 'Id').get().then(langues => {
-          validLanguages = langues;
-        });
-      
-        let items = sp.web.lists.getByTitle('Documents').items;
-        Dialog.alert("lastUpdateDateTime " + lastUpdateDateTime);
-
-        //Sélectionner les fichiers modifiés depuis la dérniére mise à jour, et modifié leurs champs si le nom du fichier est de bon format.
-        //FSObjType ne 1 => ne pas prendre les dossiers
-        //Modified ge datetime'${lastUpdateDateTime}' =>  champs Modified >lastUpdateDateTime
-        items.select('Id', 'Modified', 'File/Name').expand('File/Name').
-          filter(`FSObjType ne 1 and Modified ge datetime'${lastUpdateDateTime}'`)
-          .get().then(response => {
-            response.forEach(element => {
+          else {
+            response.forEach((element, index, elements) => {
               let fileName = element.File.Name;
-              Dialog.alert("Date Modif " + element.Modified);
               let message = "";
               let fileNameSplit = fileName.split("_");
               if (fileNameSplit.length == 6) {
@@ -183,7 +189,6 @@ export default class UpdateDocPropertiesCommandSet extends BaseListViewCommandSe
                 items.getById(element.Id).inBatch(batch).update({
                   Subject: subject,
                 });
-
                 /* Mettre à jour les 4 champs au mm temps. Si la modification d'un seule champs échoue, c'est toutes les modifs qui échouent.
                 items.getById(element.Id).inBatch(batch).update({
                   TypeDoc: typeDoc,
@@ -194,21 +199,25 @@ export default class UpdateDocPropertiesCommandSet extends BaseListViewCommandSe
                   console.log(JSON.stringify(result));
                 });
                 */
-                batch.execute();
+                batch.execute().then(() => {
+                  //Quand toutes les propriétés du dernier élement de la liste sont modifiées
+                  //On met à jour la propriété LastUpdateDateTime avec la date et l'heure du moment (now)
+                  if (index === elements.length - 1) {
+                    let nowDateTime = dateToIsoString(new Date());
+                    rootFolder.get_properties().set_item("LastUpdateDateTime", nowDateTime);
+                    rootFolder.update();
+                    clientContext.executeQueryAsync();
+                  }
+                });
               }
             }
             );
-            //Mettre à jour la propriété LastUpdateDateTime avec la date et l'heure du moment (now)
-            let datetime = dateToIsoString(new Date());
-            rootFolder.get_properties().set_item("LastUpdateDateTime", datetime);
-            rootFolder.update();
-            clientContext.executeQueryAsync();
           }
-          )
-      }, 1000);
+
+        }
+        )
     }
-
-
+    //Conversion d'une date vers le format ISO sans millisecondes
     let dateToIsoString = (date: Date) => {
       return date.toISOString().split('.')[0] + "Z";//le split sert à éliminer les millisecondes 
     }
@@ -259,7 +268,7 @@ export default class UpdateDocPropertiesCommandSet extends BaseListViewCommandSe
       let month = datePub.substring(2, 4);
       let day = datePub.substring(4);
       if (datePub.length == 6 && month <= 12 && day <= 31) {
-        return "20" + year + "-" + month + "-" + day + "T00:00:00Z";  // ex: iso date format "2019-05-24T23:00:00Z"
+        return "20" + year + "-" + month + "-" + day + "T23:00:00Z";  // ex: iso date format "2019-05-24T23:00:00Z"
       }
       return "";
     }
@@ -269,12 +278,13 @@ export default class UpdateDocPropertiesCommandSet extends BaseListViewCommandSe
   public onListViewUpdated(event: IListViewCommandSetListViewUpdatedParameters): void {
   }
 
-  /*Cette fonction se déclenche au moment du clic sur le bouton MDE*/
+  /*Cette méthode se déclenche au moment de l'éxécution d'une commande*/
   @override
   public onExecute(event: IListViewCommandSetExecuteEventParameters): void {
     switch (event.itemId) {
       case 'MDE':
-        SP.SOD.executeFunc('sp.js', 'SP.ClientContext', this.spExecutionContext);
+        //éxécuter la fonction executeCommandMDE dans le ccontext SP
+        SP.SOD.executeFunc('sp.js', 'SP.ClientContext', this.executeCommandMDE);
         break;
       default:
         throw new Error('Unknown command');
