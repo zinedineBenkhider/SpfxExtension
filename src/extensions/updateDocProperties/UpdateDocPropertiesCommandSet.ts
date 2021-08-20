@@ -1,5 +1,4 @@
 import { override } from '@microsoft/decorators';
-
 import {
   BaseListViewCommandSet,
   IListViewCommandSetListViewUpdatedParameters,
@@ -18,7 +17,6 @@ require('microsoft-ajax');
 require('sp-runtime');
 require('sharepoint');
 
-
 export interface IUpdateDocPropertiesCommandSetProperties {
   siteUrl: string;
 }
@@ -26,7 +24,6 @@ export interface IUpdateDocPropertiesCommandSetProperties {
 export interface IChoiceFieldInfo extends IFieldInfo {
   Choices: string[];
 }
-
 
 export default class UpdateDocPropertiesCommandSet extends BaseListViewCommandSet<IUpdateDocPropertiesCommandSetProperties> {
   @override
@@ -40,26 +37,24 @@ export default class UpdateDocPropertiesCommandSet extends BaseListViewCommandSe
   }
 
   //Cette méthode s'éxécute dans le Context SP (SP.ClientContext)
-  // Elle contient des fonctions et des CallBack.  
-  private updateItems() {
+  //Elle contient une fonctions et un CallBack.  
+  private executeMDEcommand() {
     //init services
     let documentListService: DocumentListService = new DocumentListService(sp);
     let propertyBagService: PropertyBagService = new PropertyBagService();
-    let callBack=(sender: any, args: SP.ClientRequestSucceededEventArgs) => {
-      let lastUpdateDateTime 
-      try{
-        lastUpdateDateTime= propertyBagService.getPropertyLastUpdateDateTime();
-      }
-      catch (error){
-        lastUpdateDateTime = PropertyBagService.dateToIsoString(new Date('01 January 1900 00:00 UTC'));
-      }
     
+    //CallBack qui s'éxécute quand les Properties Bag sont récupérées
+    let onGetLastUpdateDateTimeSuccess=(sender: any, args: SP.ClientRequestSucceededEventArgs) => {
+      let lastUpdateDateTime = propertyBagService.getPropertyLastUpdateDateTime();
       //Mettre à jour les éléments de la liste de Documents
-
-      updateDocuments(lastUpdateDateTime);
+      updateListItems(lastUpdateDateTime);
     }
 
-    let updateDocuments=async lastUpdateDateTime=>{
+    //Récupérer les propriétés de RootFolder de la liste documents 
+    propertyBagService.getProperties(onGetLastUpdateDateTimeSuccess);
+    
+    //Mofifier les colonnes de la liste de documents
+    let updateListItems=async lastUpdateDateTime=>{
         let validLanguages;
         let validTypesDoc = [];
         let validLocalisations: Localisation[] = [];
@@ -81,7 +76,7 @@ export default class UpdateDocPropertiesCommandSet extends BaseListViewCommandSe
           validLanguages = langues;
         });
 
-        //Attendre que les Promises terminent. nb: on attend que la plus lente des 3
+        //Attendre que les Promises terminent. Nb: on attend que la plus lente des 3
         await getLocalisationsPromise;
         await getChoicesPromise;
         await getLanguagesListPromise;
@@ -169,7 +164,6 @@ export default class UpdateDocPropertiesCommandSet extends BaseListViewCommandSe
         }
         )
     }
-    propertyBagService.getProperties(callBack);
   }
 
   @override
@@ -182,7 +176,7 @@ export default class UpdateDocPropertiesCommandSet extends BaseListViewCommandSe
     switch (event.itemId) {
       case 'MDE':
         //éxécuter la fonction updateItems dans le ccontext SP
-        SP.SOD.executeFunc('sp.js', 'SP.ClientContext', this.updateItems);
+        SP.SOD.executeFunc('sp.js', 'SP.ClientContext', this.executeMDEcommand);
         break;
       default:
         throw new Error('Unknown command');

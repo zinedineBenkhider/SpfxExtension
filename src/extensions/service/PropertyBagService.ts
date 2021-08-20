@@ -17,7 +17,13 @@ export default class PropertyBagService {
     }
 
     public getPropertyLastUpdateDateTime(){
-        let lastUpdateDateTime = this.rootFolderProperties.get_item("LastUpdateDateTime");
+        let lastUpdateDateTime;
+        try{
+            lastUpdateDateTime= this.rootFolderProperties.get_item("LastUpdateDateTime");
+          }
+          catch (error){
+            lastUpdateDateTime = PropertyBagService.dateToIsoString(new Date('01 January 1900 00:00 UTC'));
+          }
         return lastUpdateDateTime;
     }
 
