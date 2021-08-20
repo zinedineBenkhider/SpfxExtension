@@ -17,12 +17,7 @@ export default class PropertyBagService {
     }
 
     public getPropertyLastUpdateDateTime(){
-        let lastUpdateDateTime;
-        try {
-            lastUpdateDateTime = this.rootFolderProperties.get_item("LastUpdateDateTime");
-          } catch (error) {//La propriété LastUpdateDateTime n'éxiste pas, on prend une date antérieur. Aprés la mise à jour de la liste LastUpdateDateTime sera créé avec cette date. 
-            lastUpdateDateTime = PropertyBagService.dateToIsoString(new Date('01 January 1900 00:00 UTC'));
-          }
+        let lastUpdateDateTime = this.rootFolderProperties.get_item("LastUpdateDateTime");
         return lastUpdateDateTime;
     }
 

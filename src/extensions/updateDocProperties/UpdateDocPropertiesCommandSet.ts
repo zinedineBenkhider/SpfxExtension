@@ -31,7 +31,6 @@ export interface IChoiceFieldInfo extends IFieldInfo {
 export default class UpdateDocPropertiesCommandSet extends BaseListViewCommandSet<IUpdateDocPropertiesCommandSetProperties> {
   @override
   public onInit(): Promise<void> {
-
     //init sp contecspfxContext
     return super.onInit().then((_) => {
       sp.setup({
@@ -46,15 +45,24 @@ export default class UpdateDocPropertiesCommandSet extends BaseListViewCommandSe
     //init services
     let documentListService: DocumentListService = new DocumentListService(sp);
     let propertyBagService: PropertyBagService = new PropertyBagService();
-
-    propertyBagService.getProperties((sender: any, args: SP.ClientRequestSucceededEventArgs) => {
-      let lastUpdateDateTime = propertyBagService.getPropertyLastUpdateDateTime();
+    let callBack=(sender: any, args: SP.ClientRequestSucceededEventArgs) => {
+      let lastUpdateDateTime 
+      try{
+        lastUpdateDateTime= propertyBagService.getPropertyLastUpdateDateTime();
+      }
+      catch (error){
+        lastUpdateDateTime = PropertyBagService.dateToIsoString(new Date('01 January 1900 00:00 UTC'));
+      }
+    
       //Mettre à jour les éléments de la liste de Documents
-      async () => {
+
+      updateDocuments(lastUpdateDateTime);
+    }
+
+    let updateDocuments=async lastUpdateDateTime=>{
         let validLanguages;
         let validTypesDoc = [];
         let validLocalisations: Localisation[] = [];
-
         //Récupérer les éléments du Set Localisation
         let getLocalisationsPromise = documentListService.getLocalisationsTermeStore().then(items => {
           let element;
@@ -63,7 +71,6 @@ export default class UpdateDocPropertiesCommandSet extends BaseListViewCommandSe
             validLocalisations.push(new Localisation(element.labels[0].name, element.id));
           }
         });
-
         //récupérer la choice list du champs TypeDoc
         let getChoicesPromise = documentListService.getChoicesTypeDoc().then((fieldData: IChoiceFieldInfo) => {
           validTypesDoc = fieldData.Choices;
@@ -148,7 +155,6 @@ export default class UpdateDocPropertiesCommandSet extends BaseListViewCommandSe
                   }
                   toast.show({ title: '', message: message, type: "info", newestOnTop: false });
                 }
-
                 //éxécuter les requtes update du Batch
                 documentListService.executeBatch().then(() => {
                   //Quand toutes les propriétés du dernier élement de la liste sont modifiées on met à jour la propriété LastUpdateDateTime avec la date et l'heure du moment (now)
@@ -162,10 +168,8 @@ export default class UpdateDocPropertiesCommandSet extends BaseListViewCommandSe
           }
         }
         )
-      }
-    });
-
-
+    }
+    propertyBagService.getProperties(callBack);
   }
 
   @override
