@@ -19,7 +19,7 @@
   
     "MDE": {
       "title": { "default": "MDE" },
-      "iconImageUrl": "icons/mde.png",
+      "iconImageUrl": "UPDATE_HERE",
       "type": "command"
     }
   }

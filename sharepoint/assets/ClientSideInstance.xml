@@ -5,6 +5,6 @@
         Title="UpdateDocProperties"
         Location="ClientSideExtension.ListViewCommandSet.CommandBar"
         ListTemplateId="100"
-        Properties="{&quot;siteUrl&quot;:&quot;https://zinedinebenkhider.sharepoint.com/sites/MetaDataEnterprise&quot;}"
+        Properties=""
         ComponentId="467f2217-c0cf-4603-a0f8-b92f991897f3" />
 </Elements>

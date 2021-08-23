@@ -1,7 +1,7 @@
 import { IItems, SPBatch, SPRest } from '@pnp/sp/presets/all';
 export class Localisation {
-    name: string;
-    id: any;
+    public name: string;
+    public id: any;
     constructor(name: string, id: any) {
       this.name = name;
       this.id = id;
@@ -44,7 +44,7 @@ export default class DocumentListService {
     public getFilesModified(lastUpdateDateTime): Promise<any> {
         return this.docItems.select('Id', 'File/Name').expand('File/Name').
             filter(`FSObjType ne 1 and Modified ge datetime'${lastUpdateDateTime}'`)
-            .get()
+            .get();
     }
 
     public updateValueOfLocalisation(id, localisation, validLocalisationId) {
@@ -79,7 +79,7 @@ export default class DocumentListService {
     //Cette fonction Vérifie si une langue est présente dans une liste de Langues 
     //valideLanguages : list d'objet Langue qui contient deux attributs: Title, Id
     //@return: l'Id si la valeur est présente, sinon -1 
-    static isValidLanguage  (language: string, validLanguages)  {
+    public static isValidLanguage  (language: string, validLanguages)  {
         let languageId = -1;
         validLanguages.forEach(element => {
           if (element.Title == language) {
@@ -92,7 +92,7 @@ export default class DocumentListService {
       //Cette fonction vérifie si une localisation est présente dans une liste de localisations 
       //validLocalisations : list d'objet Localisation qui contient deux attributs: name, id
       //@return: l'Id si la valeur est présente, sinon -1 
-      static isValidLocalisation (localisationName: string, validLocalisations: Localisation[]) {
+      public static isValidLocalisation (localisationName: string, validLocalisations: Localisation[]) {
         let localisationId = -1;
         for (let index = 0; index < validLocalisations.length; index++) {
           if (validLocalisations[index].name == localisationName) {
@@ -105,10 +105,10 @@ export default class DocumentListService {
       //Cette fonction vérifie si un TypeDoc est présente dans une liste de TypeDoc 
       //validTypesDoc : list de TypeDoc
       //@return: true si la valeur est présente, sinon false 
-      static isValidTypeDoc (value: string, validTypesDoc: string[])  {
+      public static isValidTypeDoc (value: string, validTypesDoc: string[])  {
         for (let index = 0; index < validTypesDoc.length; index++) {
           if (validTypesDoc[index] == value) {
-            return true
+            return true;
           }
         }
         return false;
@@ -117,11 +117,11 @@ export default class DocumentListService {
       //Cette fonction vérifie si une date est une chaine de 6 charactere
       //validLocalisations : list de TypeDoc
       //@return: la date sous format ISO si la date est valide, sinon une chaine vide
-      static isValidDateFormat  (datePub) {
+      public static isValidDateFormat (datePub) {
         let year = datePub.substring(0, 2);
         let month = datePub.substring(2, 4);
         let day = datePub.substring(4);
-        if (datePub.length == 6 && month <= 12 && day <= 31) {
+        if (datePub.length == 6 && month <= 12 && month > 0 && day <= 31 && day> 0) {
           return "20" + year + "-" + month + "-" + day + "T23:00:00Z";  // ex: iso date format "2019-05-24T23:00:00Z"
         }
         return "";

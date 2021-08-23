@@ -14,25 +14,25 @@
   //UPDATE_HERE
   "externals": {
     "sp-init": {
-      "path": "https://zinedinebenkhider.sharepoint.com/_layouts/15/init.js",
+      "path": "https://static.sharepoint.com/_layouts/15/init.js",
       "globalName": "$_global_init"
     },
     "microsoft-ajax": {
-      "path": "https://zinedinebenkhider.sharepoint.com/_layouts/15/MicrosoftAjax.js",
+      "path": "https://static.sharepoint.com/_layouts/15/MicrosoftAjax.js",
       "globalName": "Sys",
       "globalDependencies": [
         "sp-init"
       ]
     },
     "sp-runtime": {
-      "path": "https://zinedinebenkhider.sharepoint.com/_layouts/15/SP.Runtime.js",
+      "path": "https://static.sharepoint.com/_layouts/15/SP.Runtime.js",
       "globalName": "SP",
       "globalDependencies": [
         "microsoft-ajax"
       ]
     },
     "sharepoint": {
-      "path": "https://zinedinebenkhider.sharepoint.com/_layouts/15/SP.js",
+      "path": "https://static.sharepoint.com/_layouts/15/SP.js",
       "globalName": "SP",
       "globalDependencies": [
         "sp-runtime"
