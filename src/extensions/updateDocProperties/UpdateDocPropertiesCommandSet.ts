@@ -43,7 +43,7 @@ export default class UpdateDocPropertiesCommandSet extends BaseListViewCommandSe
     let documentListService: DocumentListService = new DocumentListService(sp);
     let propertyBagService: PropertyBagService = new PropertyBagService();
     //Cette fonction modifie les colonnes de la liste de documents
-    let updateListItems=async lastUpdateDateTime=>{
+    let updateListItems = async lastUpdateDateTime => {
       let validLanguages;
       let validTypesDoc = [];
       let validLocalisations: Localisation[] = [];
@@ -152,9 +152,9 @@ export default class UpdateDocPropertiesCommandSet extends BaseListViewCommandSe
         }
       }
       );
-  };
+    };
     //CallBack qui s'éxécute quand les Properties Bag sont récupérées
-    let onGetLastUpdateDateTimeSuccess=(sender: any, args: SP.ClientRequestSucceededEventArgs) => {
+    let onGetLastUpdateDateTimeSuccess = (sender: any, args: SP.ClientRequestSucceededEventArgs) => {
       let lastUpdateDateTime = propertyBagService.getPropertyLastUpdateDateTime();
       //Mettre à jour les éléments de la liste de Documents
       updateListItems(lastUpdateDateTime);
@@ -163,7 +163,7 @@ export default class UpdateDocPropertiesCommandSet extends BaseListViewCommandSe
     //Récupérer les propriétés de RootFolder de la liste documents 
     propertyBagService.getProperties(onGetLastUpdateDateTimeSuccess);
 
-    
+
   }
 
   @override

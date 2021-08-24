@@ -1,5 +1,5 @@
 {
- //UPDATE_HERE
+  "$schema": "https://developer.microsoft.com/json-schemas/core-build/serve.schema.json",
   "port": 4321,
   "https": true,
   "serveConfigurations": {
@@ -9,7 +9,7 @@
         "467f2217-c0cf-4603-a0f8-b92f991897f3": {
           "location": "ClientSideExtension.ListViewCommandSet.CommandBar",
           "properties": {
-            "siteUrl": "https://zinedinebenkhider.sharepoint.com/sites/MetaDataEnterprise"
+            
           }
         }
       }
@@ -20,7 +20,7 @@
         "467f2217-c0cf-4603-a0f8-b92f991897f3": {
           "location": "ClientSideExtension.ListViewCommandSet.CommandBar",
           "properties": {
-            "siteUrl": "https://zinedinebenkhider.sharepoint.com/sites/MetaDataEnterprise"
+        
           }
         }
       }

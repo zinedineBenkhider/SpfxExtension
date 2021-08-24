@@ -3,7 +3,6 @@ export default class PropertyBagService {
     private rootFolderProperties: SP.PropertyValues;
     private rootFolder: SP.Folder;
     constructor() {
-        //UPDATE_HERE
         let siteUrl = window.location.protocol + "//" + window.location.host + _spPageContextInfo.siteServerRelativeUrl;
         this.clientContext = new SP.ClientContext(siteUrl);
         let oweb = this.clientContext.get_web();
@@ -34,7 +33,6 @@ export default class PropertyBagService {
         this.rootFolder.update();
         this.clientContext.executeQueryAsync();
     }
-
 
     //Conversion d'une date vers le format ISO sans millisecondes
     public static dateToIsoString(date: Date) {
