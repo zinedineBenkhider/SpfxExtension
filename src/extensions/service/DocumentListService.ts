@@ -35,14 +35,15 @@ export default class DocumentListService {
     return this.sp.web.lists.getByTitle('Documents').fields.getByInternalNameOrTitle('TypeDoc').select('Choices').get();
   }
   public getLocalisationsTermeStore(): Promise<any> {
+    //cc1a4b2e-d36c-4861-b9ba-1a01224019f4 6a921481-3b68-4b58-acea-60893f914f98
     //UPDATE_HERE : ID du groupe CCI termeStore => 45f13976-c5f0-4f49-b7cf-004afa72d7b4 | ID du Set Localisation=> 7ee71116-9a06-40fe-be85-b66ee794847d
-    return this.sp.termStore.groups.getById("45f13976-c5f0-4f49-b7cf-004afa72d7b4").sets.getById("7ee71116-9a06-40fe-be85-b66ee794847d").children();
+    return this.sp.termStore.groups.getById("4212d6d5-226e-4798-8ac4-d47d07d34d33").sets.getById("12d8cbd3-3c90-4233-abca-7791333730a3").children();
   }
 
   //FSObjType ne 1 => ne pas prendre les dossiers
   //Modified ge datetime'${lastUpdateDateTime}' =>  champs Modified >lastUpdateDateTime
   public getFilesModified(lastUpdateDateTime): Promise<any> {
-    return this.docItems.select('Id', 'File/Name').expand('File/Name').
+    return this.docItems.select('Id','Modified', 'File/Name').expand('File/Name').
       filter(`FSObjType ne 1 and Modified ge datetime'${lastUpdateDateTime}'`)
       .get();
   }

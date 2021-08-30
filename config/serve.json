@@ -4,23 +4,21 @@
   "https": true,
   "serveConfigurations": {
     "default": {
-      "pageUrl": "https://zinedinebenkhider.sharepoint.com/sites/MetaDataEnterprise/Shared%20Documents/Forms/AllItems.aspx",
+      "pageUrl": "https://devstibmivb.sharepoint.com/sites/MDEextract/Documents%20partages/Forms/AllItems.aspx",
       "customActions": {
         "467f2217-c0cf-4603-a0f8-b92f991897f3": {
           "location": "ClientSideExtension.ListViewCommandSet.CommandBar",
           "properties": {
-            
           }
         }
       }
     },
     "updateDocProperties": {
-      "pageUrl": "https://zinedinebenkhider.sharepoint.com/sites/MetaDataEnterprise/Shared%20Documents/Forms/AllItems.aspx",
+      "pageUrl": "https://devstibmivb.sharepoint.com/sites/MDEextract/Documents%20partages/Forms/AllItems.aspx",
       "customActions": {
         "467f2217-c0cf-4603-a0f8-b92f991897f3": {
           "location": "ClientSideExtension.ListViewCommandSet.CommandBar",
           "properties": {
-        
           }
         }
       }
