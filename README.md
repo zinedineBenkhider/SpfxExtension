@@ -2,7 +2,7 @@
 
 ## Summary
 
-Technologies: node.js, TypeScrript, JSOM API, PnpJS, Spfx Extension
+Technologies: node.js, TypeScrript, JSOM API, PnpJS: 2.7.0, Spfx Extension
 
 ## Used SharePoint Framework Version
 
@@ -10,7 +10,7 @@ Technologies: node.js, TypeScrript, JSOM API, PnpJS, Spfx Extension
 
 ## Prerequisites Installs
 
-- Node.js
+- Node.js: version 10 or version 14
 - gulp: CLI version: 2.3.0 and Local version: 4.0.2
 
 ## Minimal Path to Awesome
